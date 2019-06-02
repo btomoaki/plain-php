@@ -1,0 +1,44 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes:
+    - ./nginx/nginx.d/nginx.conf:/etc/nginx/conf.d/default.conf
+    - ./www/html:/var/www/html
+    depends_on:
+    - php
+
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+    - ./www/html:/var/www/html
+    depends_on:
+    - db
+
+  db:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+#    container_name: mysql
+    image: mysql:5.7
+    ports:
+    - 13306:3306
+    volumes:
+    - ./mysql/data:/var/lib/mysql/
+    user: "1000:50"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      TZ: 'Asia/Tokyo'
+
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin:latest
+#    ports:
+#    - 8888:8081
+#    depends_on:
+#    - db
